@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--  bootstrap使用  -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <!--  ajax使用  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <title>映画の宝箱</title>
+
+    <!--  use　Google Fonts  -->
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300&display=swap" rel="stylesheet">
+    <!--  my style / url_for()を使用してstyleシートの経路を変更　-->
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+
+
+</head>
+
+<body>
+<!-- header -->
+<header>
+    <div class="mytitle">
+        <h1>私が思う名作映画</h1>
+        <!-- clickするとid="post-box"のdivが表示されるようにfunction open_box()を作成 -->
+        <button onclick="open_box()">映画を記録</button>
+    </div>
+</header>
+
+<!-- main -->
+<main>
+    <!-- bootstrapを使用したcard box -->
+    <div class="mypost" id="post-box">
+        <!-- 映画サイトのURL入力欄/typeをemailからurlに変更　 -->
+        <div class="form-floating mb-3">
+            <input id="url" type="url" class="form-control">
+            <label>映画URL</label>
+        </div>
+        <!-- 星の絵文字を使用した評価入力欄　 -->
+        <div class="input-group mb-3">
+            <label class="input-group-text" for="inputGroupSelect01">評価</label>
+            <select class="form-select" id="star">
+                <option selected>-- 選択する --</option>
+                <option value="1">⭐</option>
+                <option value="2">⭐⭐</option>
+                <option value="3">⭐⭐⭐</option>
+                <option value="4">⭐⭐⭐⭐</option>
+                <option value="5">⭐⭐⭐⭐⭐</option>
+            </select>
+        </div>
+        <!-- コメント入力欄　 -->
+        <div class="form-floating">
+            <textarea id="comment" class="form-control"></textarea>
+            <label for="floatingTextarea2">コメント</label>
+        </div>
+        <div class="mybtns">
+            <!-- onclickで自分が記入した内容でid="cards-box"のdivがWEBページに表示される -->
+            <button onclick="posting()" type="button" class="btn btn-dark">記録する</button>
+            <!-- onclickで記録するid="post-box"のdivを隠す -->
+            <button onclick="close_box()" type="button" class="btn btn-outline-dark">閉じる</button>
+        </div>
+    </div>
+    <div class="mycards">
+        <div class="row row-cols-1 row-cols-md-4 g-4" id="cards-box">
+        </div>
+    </div>
+</main>
+
+<script>
+    // HTMLの読み込みが終わったら、function listing()を実行する。
+    $(document).ready(function () {
+        listing();
+    });
+
+
+    function listing() {
+        $.ajax({
+            type: 'GET',
+            url: '/movie',
+            data: {},
+            success: function (response) {
+                let rows = response['movies']
+                for(let i = 0; i < rows.length; i++) {
+                    let comment = rows[i]['comment']
+                    let title = rows[i]['title']
+                    let desc = rows[i]['desc']
+                    let image = rows[i]['image']
+                    let star = rows[i]['star']
+
+                    let star_image = '⭐'.repeat(star)
+
+                    let temp_html = `
+                                <div class="col">
+                                    <div class="card h-80">
+                                        <img src="${image}"　class="card-img-top">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${title}</h5>
+                                            <p class="card-text">${desc}</p>
+                                            <p>${star_image}</p>
+                                            <p class="mycomment">${comment}</p>
+                                        </div>
+                                    </div>
+                                </div>`
+
+                    $('#cards-box').append(temp_html);
+                }
+            }
+        })
+    }
+        //　
+        function posting() {
+            let url = $('#url').val()
+            let star = $('#star').val()
+            let comment = $('#comment').val()
+
+            $.ajax({
+                type: 'POST',
+                url: '/movie',
+                data: {url_give: url, star_give: star, comment_give: comment},
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.reload()
+                }
+            });
+        }
+        // 私が記録するカードボックスである、id＝"post-box"のdivがbodyに表示されるfunction機能
+        function open_box() {
+            $('#post-box').show()
+        }
+
+        function close_box() {
+            $('#post-box').hide()
+        }
+</script>
+
+</body>
+
+
+</html>
