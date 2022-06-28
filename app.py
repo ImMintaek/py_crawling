@@ -7,10 +7,11 @@ from bs4 import BeautifulSoup
 
 # DBはnoSQLサービスであるMongoDBを使用
 from pymongo import MongoClient
+import os
 import certifi
 
 ca = certifi.where()
-client = MongoClient('mongodb+srv://xxxx:xxxx@cluster0.ko18o.mongodb.net/Cluster0?retryWrites=true&w=majority', tlsCAFile=ca)
+client = MongoClient(os.environ.get('mongo_db_path'), tlsCAFile=ca)
 db = client.dbsparta
 
 
